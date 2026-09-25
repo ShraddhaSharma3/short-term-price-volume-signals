@@ -1,0 +1,11 @@
+Short-Term Price Reversal Signals
+=================================
+
+3-Day Lookback
+-rank(ts_delta(close, 3))
+
+5-Day Lookback
+-rank(ts_delta(close, 5))
+
+10-Day Lookback
+-rank(ts_delta(close, 10))

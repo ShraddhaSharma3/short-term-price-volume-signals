@@ -1,0 +1,11 @@
+Price-Volume Interaction Signals
+================================
+
+3-Day Lookback
+-rank(ts_delta(close, 3)) * rank(ts_delta(volume, 3))
+
+5-Day Lookback
+-rank(ts_delta(close, 5)) * rank(ts_delta(volume, 5))
+
+10-Day Lookback
+-rank(ts_delta(close, 10)) * rank(ts_delta(volume, 10))

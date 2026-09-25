@@ -1,0 +1,490 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\title{Short-Term Price and Volume Signals in Cross-Sectional Equity Markets: An Empirical Study Using WorldQuant BRAIN}
+
+\author{
+    Shraddha Sharma\\
+    \textit{Independent Researcher}
+}
+
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+
+
+
+\section{Abstract}
+
+This study investigates the empirical behavior of two cross-sectional equity-market signals based on short-term price and trading-volume information. The first signal is a short-term price-reversal factor that assigns higher scores to securities experiencing relatively larger recent price declines. The second signal extends this approach by incorporating changes in trading volume alongside recent price movements. Both signal families were simulated using the WorldQuant BRAIN quantitative research platform, which provides historical financial data, predefined mathematical operators, and tools for constructing and evaluating quantitative alpha models. 
+
+To examine sensitivity to the choice of signal horizon, each signal was evaluated over 3-, 5-, and 10-trading-day lookback periods. Performance was assessed using Sharpe ratio, annualized returns, turnover, maximum drawdown, fitness, and margin. The results show positive aggregate performance across the tested specifications, although performance varied considerably across individual years and lookback horizons. The 5-day price-volume specification produced the highest aggregate Sharpe ratio among the tested models, while the shorter-horizon price-reversal specification generated the highest aggregate return within its signal family.
+
+The results provide evidence that simple transformations of recent price and volume information can produce economically meaningful simulated cross-sectional signals. However, the results should not be interpreted as evidence of guaranteed future profitability. Differences in performance across years, turnover levels, parameter choices, and the limitations of historical simulation highlight the importance of robustness testing and further out-of-sample research.
+
+\textbf{Keywords:} quantitative finance, alpha, equity markets, mean reversion, price reversal, trading volume, cross-sectional analysis, algorithmic trading, quantitative research
+
+ \section{Introduction}
+
+Quantitative finance involves the systematic use of mathematical models, statistical techniques, and financial data to identify relationships that may be useful for investment decision-making. One important area of quantitative research is the development of \textbf{alpha signals}: mathematical expressions designed to identify differences in the expected future performance of securities.
+
+WorldQuant BRAIN is a quantitative research and simulation platform that allows users to construct and test alpha ideas using historical market data and predefined operators. WorldQuant describes an alpha as a mathematical model that seeks to predict future price movements of financial instruments. 
+
+One commonly studied phenomenon in financial markets is short-term return reversal. Under a short-term reversal framework, securities that have experienced relatively strong recent declines may subsequently exhibit higher returns than securities that have recently experienced relatively strong gains. The existence and strength of such relationships can vary according to the time horizon, market environment, security characteristics, and implementation methodology.
+
+Trading volume provides another potentially useful source of information. Changes in volume may contain information about investor activity, liquidity, attention, or the strength of recent market movements. Combining price information with volume information therefore provides a natural extension of a purely price-based signal.
+
+This study examines two related quantitative signals:
+
+\begin{enumerate}
+    \item A \textbf{short-term price-reversal signal}, based on recent changes in closing prices. 
+    \item A \textbf{price-volume interaction signal}, combining recent changes in closing prices and trading volume. 
+\end{enumerate}
+Rather than evaluating only one arbitrary parameter choice, the study tests each signal using 3-, 5-, and 10-trading-day lookback periods. This provides a simple sensitivity analysis and allows the relationship between signal horizon, performance, and turnover to be examined.
+
+The central research questions are:
+
+\begin{itemize}
+    \item Can a simple short-term price-reversal signal generate positive simulated cross-sectional performance? 
+    \item Does incorporating trading-volume information change the characteristics of the signal? 
+    \item How sensitive are the results to the chosen lookback period? 
+    \item Are the observed results consistent across different calendar years? 
+    \item What limitations should be considered when interpreting the simulation results? 
+\end{itemize}
+
+\section{Research Methodology}
+
+\subsection{ Research Environment}
+
+The experiments were conducted using the WorldQuant BRAIN simulation platform. BRAIN provides users with financial datasets, quantitative operators, performance dashboards, and tools for constructing and testing alpha models. 
+
+The experiments used the following primary configuration:
+
+\begin{itemize}
+    \item \textbf{Region:}USA 
+    \item \textbf{Instrument type:}Equity 
+    \item \textbf{Universe:}TOP3000 
+    \item \textbf{Delay:}1 
+    \item \textbf{Neutralization:}Subindustry 
+    \item \textbf{Decay:}6 
+    \item \textbf{Truncation:}0.08 
+    \item \textbf{Pasteurization:}On 
+    \item \textbf{Unit handling:}Verify 
+    \item \textbf{NaN handling:}Off 
+    \item \textbf{Test period:}1 year 
+    \item \textbf{Lookback:}256 
+\end{itemize}
+The same general configuration was maintained when comparing the different lookback specifications in order to reduce the possibility that differences in results were caused by unrelated changes in the simulation environment.
+
+The use of subindustry neutralization means that the signals were evaluated after controlling for subindustry-level effects within the simulation framework. This is relevant because securities belonging to the same industry can experience common price and volume movements that may otherwise influence the apparent strength of a signal.
+
+\subsection{Cross-Sectional Ranking}
+
+The signals use the \verb|rank()| operator. Rather than relying directly on the magnitude of a raw variable, cross-sectional ranking transforms securities into relative positions based on their values.
+
+For example, if one security has experienced a larger recent price decline than most other securities in the universe, it receives a relatively high rank for the corresponding negative price-change signal.
+
+This approach makes the signal fundamentally \textbf{cross-sectional}: the objective is not simply to predict whether the overall market will rise or fall, but to differentiate among securities according to their relative characteristics.
+
+\section{Alpha 1: Short-Term Price Reversal}
+
+
+\subsection{Signal Construction}
+
+The first signal investigates short-term price reversal. For each security, the model measures the change in its closing price over a specified lookback period and ranks securities according to this price change. The signal reverses this ranking, assigning higher values to securities that have experienced relatively larger recent price declines.
+
+The signal is defined as:
+
+\begin{equation}
+\alpha_1(n) = -\operatorname{rank}\left(\Delta P_n\right)
+\end{equation}
+
+where \(P\) represents the closing price, \(\Delta P_n\) represents the change in closing price over the previous \(n\) trading days, and \(n\) represents the lookback period.
+
+Three different lookback periods were tested: 3, 5, and 10 trading days. The corresponding WorldQuant BRAIN Fast Expression implementations are:
+
+\begin{verbatim}
+-rank(ts_delta(close, 3))
+\end{verbatim}
+
+\begin{verbatim}
+-rank(ts_delta(close, 5))
+\end{verbatim}
+
+\begin{verbatim}
+-rank(ts_delta(close, 10))
+\end{verbatim}
+
+Testing multiple lookback periods allows the study to examine whether the observed relationship is sensitive to the chosen time horizon.
+
+ 
+
+\subsection{ Results}
+
+\subsubsection{Table 1. Price-Reversal Signal Performance}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l l l l l}
+Lookback & Sharpe Ratio & Returns & Turnover & Drawdown & Margin \\
+
+3 days & 2.10 & 12.24\% & 44.79\% & 4.16\% & 5.47 bps \\
+5 days & 1.60 & 9.22\% & 34.79\% & 4.51\% & 5.30 bps \\
+10 days & 1.50 & 8.32\% & 22.17\% & 3.58\% & 7.50 bps \\
+
+\end{tabular}
+
+\end{table}
+
+The 3-day specification produced the highest aggregate Sharpe ratio and return within this signal family. It also produced the highest turnover. As the lookback period increased from 3 to 10 days, turnover declined substantially.
+
+This pattern is consistent with an intuitive relationship between signal horizon and trading frequency. A shorter lookback responds more rapidly to changes in prices and therefore can generate more frequent changes in security rankings. A longer lookback changes more gradually and consequently produces lower turnover.
+
+The 10-day specification produced the lowest aggregate turnover and the lowest maximum drawdown of the three tested versions. However, its aggregate Sharpe ratio and return were lower than those of the 3-day specification.
+
+\section{Alpha 2: Price-Volume Interaction}
+
+\subsection{Signal Construction}
+
+The second signal extends the price-reversal approach by incorporating trading volume. The signal combines the ranked change in closing price with the ranked change in trading volume over the same lookback period.
+
+The signal is defined as:
+
+\begin{equation}
+\alpha_2(n) =
+-\operatorname{rank}\left(\Delta P_n\right)
+\times
+\operatorname{rank}\left(\Delta V_n\right)
+\end{equation}
+
+where \(P\) represents the closing price, \(V\) represents trading volume, and \(n\) represents the lookback period.
+
+The signal was evaluated using 3-, 5-, and 10-trading-day lookback periods. The corresponding WorldQuant BRAIN Fast Expression implementations are:
+
+\begin{verbatim}
+-rank(ts_delta(close, 3)) * rank(ts_delta(volume, 3))
+\end{verbatim}
+
+\begin{verbatim}
+-rank(ts_delta(close, 5)) * rank(ts_delta(volume, 5))
+\end{verbatim}
+
+\begin{verbatim}
+-rank(ts_delta(close, 10)) * rank(ts_delta(volume, 10))
+\end{verbatim}
+
+\subsection{Results}
+
+\subsubsection{Table 2. Price-Volume Signal Performance}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l l l l l}
+Lookback & Sharpe Ratio & Returns & Turnover & Drawdown & Margin \\
+
+3 days & 1.93 & 9.43\% & 63.66\% & 2.28\% & 2.96 bps \\
+5 days & 2.47 & 11.94\% & 51.12\% & 2.18\% & 4.67 bps \\
+10 days & 2.11 & 9.86\% & 40.75\% & 2.20\% & 4.84 bps \\
+
+\end{tabular}
+
+\end{table}
+
+The 5-day specification generated the highest aggregate Sharpe ratio of the three price-volume variants, at 2.47. It also produced an aggregate return of 11.94\%.
+
+The 10-day specification produced a lower turnover level than the 3-day and 5-day specifications while maintaining a Sharpe ratio above 2 in the aggregate results.
+
+The 3-day specification generated the highest turnover, at 63.66\%, while producing the lowest Sharpe ratio among the three price-volume variants.
+
+These results suggest that the relationship between lookback period and performance is not monotonic. Increasing the lookback period does not simply improve or reduce performance. Instead, the interaction between price and volume appears sensitive to the chosen horizon.
+
+\section{Comparison of the Two Signal Families}
+
+The two signal families exhibit different performance characteristics.
+
+\subsubsection{Table 3. Comparison of All Tested Specifications}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l l l l l}
+Signal & Lookback & Sharpe & Returns & Turnover & Drawdown \\
+
+Price reversal & 3 days & 2.10 & 12.24\% & 44.79\% & 4.16\% \\
+Price reversal & 5 days & 1.60 & 9.22\% & 34.79\% & 4.51\% \\
+Price reversal & 10 days & 1.50 & 8.32\% & 22.17\% & 3.58\% \\
+Price-volume & 3 days & 1.93 & 9.43\% & 63.66\% & 2.28\% \\
+Price-volume & 5 days & 2.47 & 11.94\% & 51.12\% & 2.18\% \\
+Price-volume & 10 days & 2.11 & 9.86\% & 40.75\% & 2.20\% \\
+
+\end{tabular}
+
+\end{table}
+
+The results show that the price-volume interaction produced stronger aggregate Sharpe ratios than the corresponding price-reversal signal at the 5- and 10-day horizons, while the pure price-reversal signal produced a higher return at the 3-day horizon.
+
+The price-volume signal also exhibited lower aggregate drawdowns in all three tested horizons than the corresponding price-reversal signal.
+
+However, these observations should not be interpreted as proof that the price-volume signal is universally superior. The two signals have different turnover characteristics, and their annual performance varies considerably. Furthermore, selecting a model solely because it has the highest historical Sharpe ratio introduces the possibility of selection bias.
+
+The purpose of this comparison is therefore descriptive: to examine how two related signal constructions behaved under the same general simulation framework.
+
+\section{Year-by-Year Robustness Analysis}
+
+Aggregate statistics can conceal significant variation across individual years. To address this issue, the annual results of the models were examined.
+
+\subsection{ Price-Reversal Signal}
+
+\subsubsection{Table 4. Annual Results for the 3-Day Price-Reversal Signal}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l l l l l l}
+Year & Sharpe & Turnover & Fitness & Returns & Drawdown & Margin \\
+
+2019 & 2.46 & 44.58\% & 1.16 & 9.91\% & 3.25\% & 4.44 bps \\
+2020 & 3.04 & 46.06\% & 2.37 & 27.90\% & 3.13\% & 12.11 bps \\
+2021 & 1.04 & 45.08\% & 0.52 & 11.36\% & 5.96\% & 5.04 bps \\
+2022 & 0.76 & 45.69\% & 0.31 & 7.53\% & 6.22\% & 3.29 bps \\
+2023 & 2.08 & 44.77\% & 1.09 & 12.19\% & 4.16\% & 5.44 bps \\
+
+\end{tabular}
+
+\end{table}
+
+The 3-day price-reversal signal was positive in each of the five individual years examined. However, the magnitude of performance varied substantially.
+
+The strongest year was 2020, when the signal produced a Sharpe ratio of 3.04 and returns of 27.90\%. Performance weakened in 2021 and 2022, before recovering in 2023.
+
+This variation is important because it demonstrates that the aggregate result should not be interpreted as uniform predictive power across all market environments.
+
+\subsection{Price-Volume Signal}
+
+\subsubsection{Table 5. Annual Results for the 5-Day Price-Volume Signal}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l l l l l l}
+Year & Sharpe & Turnover & Fitness & Returns & Drawdown & Margin \\
+
+2019 & 1.55 & 51.57\% & 0.51 & 5.58\% & 3.10\% & 2.16 bps \\
+2020 & 2.98 & 52.27\% & 1.99 & 23.27\% & 3.56\% & 8.90 bps \\
+2021 & 0.13 & 51.10\% & 0.02 & 1.13\% & 7.62\% & 0.44 bps \\
+2022 & 0.41 & 51.55\% & 0.10 & 3.29\% & 5.28\% & 1.27 bps \\
+2023 & 2.42 & 51.14\% & 1.16 & 11.69\% & 2.18\% & 4.57 bps \\
+
+\end{tabular}
+
+\end{table}
+
+The price-volume signal also exhibited substantial year-to-year variation.
+
+Its strongest annual results occurred in 2020 and 2023. In contrast, the signal's Sharpe ratio was close to zero in 2021 and remained relatively low in 2022.
+
+This is particularly relevant to the interpretation of the aggregate Sharpe ratio of 2.47. Although the aggregate statistic is strong within the simulation, the annual data indicate that the relationship is not equally strong across all market environments.
+
+Consequently, the results support further investigation rather than a conclusion that the price-volume relationship is consistently stable.
+
+\section{Lookback-Period Sensitivity}
+
+A central component of this research was testing multiple lookback periods.
+
+For the price-reversal signal, the 3-day specification produced the strongest aggregate Sharpe ratio, while the 10-day specification produced the lowest turnover.
+
+For the price-volume signal, the 5-day specification produced the strongest aggregate Sharpe ratio, while the 10-day specification produced substantially lower turnover than the shorter horizons.
+
+This demonstrates an important feature of quantitative strategy research: performance and implementation characteristics can move in different directions.
+
+Shorter horizons generally respond more quickly to new information but can require more frequent portfolio adjustments. Longer horizons can produce smoother signal changes and lower turnover, but may respond more slowly to changes in market conditions.
+
+The experiments therefore demonstrate why testing only a single parameter value can provide an incomplete picture of a quantitative model.
+
+\subsubsection{Table 6. Lookback Sensitivity}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l l l}
+Signal & 3-Day Sharpe & 5-Day Sharpe & 10-Day Sharpe \\
+
+Price reversal & 2.10 & 1.60 & 1.50 \\
+Price-volume & 1.93 & 2.47 & 2.11 \\
+
+\end{tabular}
+
+\end{table}
+
+The price-reversal results decline as the lookback period increases from 3 to 10 days. The price-volume results follow a different pattern, reaching their highest aggregate Sharpe ratio at five days.
+
+This difference suggests that the inclusion of volume changes the behavior of the signal and that the optimal historical specification cannot necessarily be inferred from the behavior of the price-only model.
+
+\section{Interpretation of the Results}
+
+Several observations emerge from the experiments.
+
+First, the results indicate that simple price-based transformations can generate meaningful cross-sectional differentiation in historical simulation. The price-reversal signal produced positive aggregate performance across all three tested lookback periods.
+
+Second, adding volume information materially changed the characteristics of the model. The price-volume signal produced positive aggregate performance at all three tested horizons, with the 5-day version producing the highest aggregate Sharpe ratio.
+
+Third, the results demonstrate a clear turnover-performance tradeoff. Shorter lookback periods generally generated higher turnover, while longer horizons reduced turnover. This is particularly visible in the price-volume family, where turnover declined from 63.66\% at the 3-day horizon to 40.75\% at the 10-day horizon.
+
+Fourth, aggregate performance does not imply consistent performance through time. Both signal families experienced weaker periods, particularly around 2021–2022. Therefore, a strong aggregate result should be interpreted alongside annual and parameter-level results.
+
+Finally, the experiments illustrate the importance of model specification. The initial price-volume formulation produced negative performance, while reversing its sign produced positive aggregate performance. This finding motivates additional research into why the relationship changes direction and whether the observed result survives more rigorous out-of-sample testing.
+
+\section{Limitations}
+
+Several limitations should be considered when interpreting this research.
+
+\subsection{Historical Simulation}
+
+The results are based on historical simulation. Historical performance does not guarantee future performance. Market relationships can weaken, disappear, or reverse as market structure changes.
+
+\subsection{Parameter Selection}
+
+Testing multiple lookback periods introduces the possibility of parameter selection bias. If many different specifications are tested and only the strongest result is reported, the apparent performance may be overstated.
+
+For this reason, the present study reports the 3-, 5-, and 10-day results rather than presenting only the highest-performing configuration.
+
+\subsection{Limited Signal Complexity}
+
+Both models use relatively simple mathematical relationships. Financial markets are affected by many factors, including company fundamentals, macroeconomic conditions, liquidity, market structure, investor behavior, and transaction costs.
+
+A signal based only on short-term price and volume changes therefore represents only one small component of the broader information set available to quantitative investors.
+
+\subsection{Transaction Costs and Implementation}
+
+Turnover is an important consideration because frequent portfolio changes can increase implementation costs. Although the BRAIN simulation provides performance metrics such as turnover and margin, actual trading may involve additional costs, including commissions, bid-ask spreads, market impact, and liquidity constraints.
+
+Consequently, simulated performance should not automatically be interpreted as achievable live-trading performance.
+
+\subsection{Market and Universe Dependence}
+
+The study focuses on the USA equity market and the TOP3000 universe under the selected BRAIN configuration. Results obtained in one region or universe may not generalize to other markets.
+
+Further testing across different regions, universes, industries, and market regimes would be necessary before making broader claims.
+
+\subsection{Out-of-Sample Validation}
+
+The experiments primarily represent research and simulation rather than a complete independent live-trading validation process. A stronger research design would separate model development from final evaluation using a genuinely untouched out-of-sample period.
+
+WorldQuant's competition framework itself distinguishes qualifying alphas for out-of-sample testing, illustrating the importance of evaluating models beyond their initial simulation results. 
+
+\section{Future Research}
+
+Several extensions could strengthen the analysis.
+
+First, future research could examine additional lookback periods between 3 and 10 days to determine whether the observed performance varies smoothly or changes sharply around particular horizons.
+
+Second, the price and volume components could be investigated separately before being recombined. This would help determine whether the volume component provides incremental information or primarily modifies the behavior of the price signal.
+
+Third, additional transformations of volume could be investigated, such as volume relative to historical averages or volume acceleration. These experiments could provide a more detailed examination of whether unusual trading activity contains predictive information.
+
+Fourth, the signals could be tested across additional geographic regions and equity universes. This would help determine whether the observed relationships are market-specific or more broadly applicable.
+
+Fifth, future work could investigate whether combining the two signal families improves diversification. Rather than treating one model as a replacement for the other, the research could examine whether their signals have sufficiently different exposures to provide complementary information.
+
+Finally, a more rigorous study could employ a predefined research protocol in which model specifications are determined before evaluation on an untouched out-of-sample dataset. This would reduce the possibility of selecting parameters based on historical results.
+
+\section{Conclusion}
+
+This study examined two simple cross-sectional equity alpha constructions using historical simulation in WorldQuant BRAIN: a short-term price-reversal signal and a price-volume interaction signal.
+
+The price-reversal model was tested over 3-, 5-, and 10-trading-day horizons. Its aggregate Sharpe ratios were 2.10, 1.60, and 1.50 respectively. The 3-day specification produced the highest aggregate return of 12.24\%, while the 10-day specification produced the lowest turnover of 22.17\%.
+
+The price-volume model was evaluated over the same three horizons. Its aggregate Sharpe ratios were 1.93, 2.47, and 2.11. The 5-day specification produced the highest aggregate Sharpe ratio and an aggregate return of 11.94\%, while the 10-day specification reduced turnover to 40.75\%.
+
+The experiments therefore provide evidence that simple combinations of recent price and volume information can generate positive historical cross-sectional signals within the tested simulation framework. At the same time, the year-by-year results reveal substantial variation in performance. In particular, both signal families experienced significantly weaker performance during some years, demonstrating that aggregate statistics alone do not establish stability.
+
+The most important finding of the study is therefore not that one particular formula guarantees superior performance, but that \textbf{signal behavior depends materially on both the information used and the time horizon over which that information is measured}.
+
+The research also demonstrates the importance of robustness analysis in quantitative finance. Testing multiple specifications, examining annual results, considering turnover, and explicitly discussing limitations provides a more complete evaluation than reporting a single historical performance statistic.
+
+Overall, the study provides a small-scale empirical framework for investigating short-term price and volume signals and establishes several directions for future research, particularly independent out-of-sample testing, broader market coverage, transaction-cost analysis, and investigation of additional volume and price transformations.
+
+\section{References}
+
+\begin{enumerate} 
+    \item  WorldQuant. \textbf{WorldQuant BRAIN: Crowdsourcing Quantitative Research.} WorldQuant. Available through the WorldQuant BRAIN platform and official website.   
+    \item  WorldQuant. \textbf{WorldQuant Launches BRAIN Platform and Inaugural Global Alphathon Competition.} August 2, 2022.   
+    \item  WorldQuant. \textbf{International Quant Championship 2026.} WorldQuant BRAIN.   
+    \item  WorldQuant. \textbf{International Quant Championship 2026 — Guidelines.} WorldQuant.   
+\end{enumerate}
+
+\subsection{Appendix A — Alpha Expressions}
+
+\subsubsection{A.1 Price-Reversal Signal}
+
+\textbf{3-day:}
+
+\begin{verbatim}
+-rank(ts_delta(close, 3))
+\end{verbatim}
+
+\textbf{5-day:}
+
+\begin{verbatim}
+-rank(ts_delta(close, 5))
+\end{verbatim}
+
+\textbf{10-day:}
+
+\begin{verbatim}
+-rank(ts_delta(close, 10))
+\end{verbatim}
+
+\subsubsection{A.2 Price-Volume Signal}
+
+\textbf{3-day:}
+
+\begin{verbatim}
+-rank(ts_delta(close, 3)) * rank(ts_delta(volume, 3))
+\end{verbatim}
+
+\textbf{5-day:}
+
+\begin{verbatim}
+-rank(ts_delta(close, 5)) * rank(ts_delta(volume, 5))
+\end{verbatim}
+
+\textbf{10-day:}
+
+\begin{verbatim}
+-rank(ts_delta(close, 10)) * rank(ts_delta(volume, 10))
+\end{verbatim}
+
+\subsection{Appendix B — Simulation Configuration}
+
+\begin{table}
+\centering
+
+\begin{tabular}{l l}
+Parameter & Setting \\
+
+Region & USA \\
+Instrument Type & Equity \\
+Delay & 1 \\
+Universe & TOP3000 \\
+Neutralization & Subindustry \\
+Decay & 6 \\
+Truncation & 0.08 \\
+Pasteurization & On \\
+Unit Handling & Verify \\
+NaN Handling & Off \\
+Test Period & 1 year \\
+Lookback & 256 \\
+Language & Fast Expression \\
+
+\end{tabular}
+
+\end{table}
+
+ 
+\end{document}
